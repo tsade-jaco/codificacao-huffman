@@ -247,6 +247,7 @@ static void MostrarArvoreInOrdem(No Raiz){
 
 static void MostrarTabelaDeCodigos(Huffman H){
 	int i = 0, j = 0;
+	char *codigo;
 
 	CriarTabelaDeBinarios(H);
 	if(H->Raiz->esquerda == NULL && H->Raiz->direita == NULL){
@@ -264,14 +265,15 @@ static void MostrarTabelaDeCodigos(Huffman H){
 
 	for(i=0;i<MAX;++i){
 		int code = H->Tabela[i][0];
+		codigo = H->Tabela[i];
 		if(code == 10)
 			printf(" LF    ");
 		else if(code == 32)
 			printf(" SP    ");
 		else
 			printf("%2c     ", H->Tabela[i][0]);
-		for (j = 1; H->Tabela[i][j] != '\0'; ++j){
-			printf("%c",H->Tabela[i][j]);
+		for (j = 1; codigo[j] != '\0'; ++j){
+			printf("%c",codigo[j]);
 			
 		}
 		printf("\n");

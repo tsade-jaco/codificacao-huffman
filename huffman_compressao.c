@@ -242,8 +242,6 @@ static void MostrarArvoreInOrdem(No Raiz){
 			printf("[SPACE] ");
 		else
 			printf("[%c] ",Raiz->simbolo);
-
-		return;
 	}
 }
 
@@ -311,7 +309,6 @@ static void ComputarNovoCodigo(No Raiz, int p, char **tabela, int *qtdBits, int 
 	Raiz = NULL;
 	free(Raiz);
 	limparNo = true;
-	return;
 	
 }
 
@@ -345,7 +342,6 @@ static void LimparNo(No Raiz, int apagarNo){
 		free(Raiz);
 		limparNo = true;
 	}
-	return;
 }
 
 static void CalcularTaxaDeCompressao(Huffman H){

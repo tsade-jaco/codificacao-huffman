@@ -34,10 +34,10 @@ static void InicializarArvoreHuffman(Huffman H);
 static void CriarArvoreHuffman(Huffman H);
 int tamanhoDaLista(No N);
 No CriarNo(int frequencia, No N, No proximo, bool estaNoFinal);
-int MostrarArvoreInOrdem(No Raiz);
+static void MostrarArvoreInOrdem(No Raiz);
 static void MostrarTabelaDeCodigos(Huffman H);
-static int ComputarNovoCodigo(No Raiz, int p, char **tabela, int *qtdBits, int linha, int coluna);
-static int  LimparNo(No Raiz, int apagarNo);
+static void ComputarNovoCodigo(No Raiz, int p, char **tabela, int *qtdBits, int linha, int coluna);
+static void  LimparNo(No Raiz, int apagarNo);
 static void CriarTabelaDeBinarios(Huffman H);
 static void CalcularTaxaDeCompressao(Huffman H);
 
@@ -86,7 +86,7 @@ static void CriarMatriz(Huffman H, int TAM){
 				jaEstaNaLista = true;
 				break;	
 			}
-			  
+
 		}
 		if(jaEstaNaLista == false){
 			chars[k] = H->texto[i];
@@ -152,6 +152,8 @@ static void InicializarArvoreHuffman(Huffman H){
 		atual = malloc(sizeof(struct no));
 		atual->simbolo = H->VetorChars[i];
 		atual->frequencia = H->VetorQTD[i];
+		atual->direita = NULL;
+		atual->esquerda = NULL;
 
 		if(i == 0){
 			H->Raiz = atual;
@@ -216,6 +218,7 @@ No CriarNo(int frequencia, No N, No proximo, bool estaNoFinal){
 	no->direita = N->proximo;
 	no->frequencia = frequencia;
 	no->simbolo = '#';
+
 	
 	if(estaNoFinal == false){
 		no->proximo = proximo;
@@ -224,29 +227,24 @@ No CriarNo(int frequencia, No N, No proximo, bool estaNoFinal){
 	return no;
 }
 
-int MostrarArvoreInOrdem(No Raiz){
-	if(Raiz->proximo != NULL){
-		Raiz->proximo = NULL;
-	}
-
+static void MostrarArvoreInOrdem(No Raiz){
+	Raiz->proximo = NULL;
 	if(Raiz->esquerda != NULL){
-			MostrarArvoreInOrdem(Raiz->esquerda);
-			if(Raiz->direita != NULL){
-				MostrarArvoreInOrdem(Raiz->direita);
-			}
-	}else{
-			int code = Raiz->simbolo;
-			if(code == 10)
-				printf("[LINE FEED] ");
-			else if(code == 32)
-				printf("[SPACE] ");
-			else
-				printf("[%c] ",Raiz->simbolo);
-	
-			Raiz->direita = NULL;
-			Raiz->esquerda = NULL;
-			return 0;
+		MostrarArvoreInOrdem(Raiz->esquerda);
+		if(Raiz->direita != NULL){
+			MostrarArvoreInOrdem(Raiz->direita);
 		}
+	}else{
+		int code = Raiz->simbolo;
+		if(code == 10)
+			printf("[LINE FEED] ");
+		else if(code == 32)
+			printf("[SPACE] ");
+		else
+			printf("[%c] ",Raiz->simbolo);
+
+		return;
+	}
 }
 
 static void MostrarTabelaDeCodigos(Huffman H){
@@ -257,9 +255,9 @@ static void MostrarTabelaDeCodigos(Huffman H){
 		H->Tabela[0][0]= H->Raiz->simbolo;
 		H->Tabela[0][1] = '0';
 	}else{
-		while(H->Raiz->esquerda != NULL || H->Raiz->direita != NULL){
-	    	ComputarNovoCodigo(H->Raiz, i, H->Tabela, &H->QTDBits, i, 1);
-	    	i++;
+		while(H->Raiz ->direita != NULL || H->Raiz->esquerda != NULL){
+			ComputarNovoCodigo(H->Raiz, i, H->Tabela, &H->QTDBits, i, 1);
+			i++;
 		}
 	}
 
@@ -268,52 +266,52 @@ static void MostrarTabelaDeCodigos(Huffman H){
 
 	for(i=0;i<MAX;++i){
 		int code = H->Tabela[i][0];
-			if(code == 10)
-				printf(" LF    ");
-			else if(code == 32)
-				printf(" SP    ");
-			else
-				printf("%2c     ", H->Tabela[i][0]);
+		if(code == 10)
+			printf(" LF    ");
+		else if(code == 32)
+			printf(" SP    ");
+		else
+			printf("%2c     ", H->Tabela[i][0]);
 		for (j = 1; H->Tabela[i][j] != '\0'; ++j){
-				printf("%c",H->Tabela[i][j]);
+			printf("%c",H->Tabela[i][j]);
 			
 		}
 		printf("\n");
 	}
 }
 
-static int ComputarNovoCodigo(No Raiz, int p, char **tabela, int *qtdBits, int linha, int coluna){
+static void ComputarNovoCodigo(No Raiz, int p, char **tabela, int *qtdBits, int linha, int coluna){
 	int apagarNo;
-		if(Raiz->esquerda != NULL){
-		        tabela[linha][coluna] = '0';
-			    apagarNo = 0;
-				ComputarNovoCodigo(Raiz->esquerda, p, tabela, qtdBits, linha, coluna+1);
-				if(limparNo == true)
-					LimparNo(Raiz, apagarNo);
-				return 0;
-	    }
-			
 
-		if(Raiz->direita != NULL){
-		    tabela[linha][coluna] = '1';
-			apagarNo = 1;
-			ComputarNovoCodigo(Raiz->direita, p, tabela, qtdBits, linha, coluna+1);
-			if(limparNo == true)
-				LimparNo(Raiz, apagarNo);
-		    return 0;
-		}
+	if(Raiz->esquerda != NULL){
+		tabela[linha][coluna] = '0';
+		apagarNo = 0;
+		ComputarNovoCodigo(Raiz->esquerda, p, tabela, qtdBits, linha, coluna+1);
+		if(limparNo)
+			LimparNo(Raiz, apagarNo);
 
-		if(Raiz->esquerda == NULL && Raiz->direita == NULL && Raiz->simbolo != '#'){ 
-			*qtdBits = Raiz->frequencia * (coluna - 1) + *qtdBits;
-		    tabela[linha][0] = Raiz->simbolo;
-		}
+		return;
+	}
 
-		
-		Raiz->direita = NULL;
-		Raiz->esquerda = NULL;
-		Raiz->proximo = NULL;
-		limparNo = true;
-		return 0;
+	if(Raiz->direita != NULL){
+		tabela[linha][coluna] = '1';
+		apagarNo = 1;
+		ComputarNovoCodigo(Raiz->direita, p, tabela, qtdBits, linha, coluna+1);
+		if(limparNo)
+			LimparNo(Raiz, apagarNo);
+
+		return;
+	}
+
+	if(Raiz->esquerda == NULL && Raiz->direita == NULL && Raiz->simbolo != '#'){ 
+		*qtdBits = Raiz->frequencia * (coluna - 1) + *qtdBits;
+		tabela[linha][0] = Raiz->simbolo;
+	}
+
+	Raiz = NULL;
+	free(Raiz);
+	limparNo = true;
+	return;
 	
 }
 
@@ -325,28 +323,29 @@ static void CriarTabelaDeBinarios(Huffman H){
 	for(int i = 0; i< MAX; ++i)
 		tabela[i] = malloc(8 * sizeof(char*));
 
-	 H->Tabela = tabela;
+	H->Tabela = tabela;
 }
 
 
 
-static int LimparNo(No Raiz, int apagarNo){
-	if(apagarNo == 0){
-			Raiz->esquerda = NULL;
-			limparNo = false;
-		}
-		
-		if(apagarNo == 1){
-			Raiz->direita = NULL;
-			limparNo = false;
-		}
+static void LimparNo(No Raiz, int apagarNo){
 
-		if(Raiz->direita == NULL && Raiz->esquerda == NULL){
-			Raiz->proximo = NULL;
-			free(Raiz);
-			limparNo = true;
-	    }
-	return 0;
+	if(apagarNo == 0)
+		Raiz->esquerda = NULL;
+
+	if(apagarNo == 1)
+		Raiz->direita = NULL;
+
+	limparNo = false;
+
+	
+	if(Raiz->direita == NULL && Raiz->esquerda == NULL){
+
+		Raiz = NULL;
+		free(Raiz);
+		limparNo = true;
+	}
+	return;
 }
 
 static void CalcularTaxaDeCompressao(Huffman H){
